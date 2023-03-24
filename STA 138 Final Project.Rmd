@@ -17,19 +17,14 @@ df$Workspace <- as.factor(df$Workspace) # Converts variable to categorical
 
 ```{r}
 # Data Visualizations
-library(ggplot2)
 ggplot(df, aes(x=Race, y=Byssinosis)) +
   geom_boxplot()
-library(ggplot2)
 ggplot(df, aes(x=Workspace, y=Byssinosis)) +
   geom_boxplot()
-library(ggplot2)
 ggplot(df, aes(x=Employment, y=Byssinosis)) +
   geom_boxplot()
-library(ggplot2)
 ggplot(df, aes(x=Smoking, y=Byssinosis)) +
   geom_boxplot()
-library(ggplot2)
 ggplot(df, aes(x=Sex, y=Byssinosis)) +
   geom_boxplot()
 ```
@@ -56,5 +51,57 @@ glm_accuracy
 ```
 
 ```{r}
+library(rpart)
 
+# Modeling the Data
+set.seed(77) # set seed for reproducibility
+
+# Create Train Test Data Split
+train_index <- createDataPartition(df$Byssinosis, p = 0.8, list = FALSE)
+train_data <- df[train_index, ]
+test_data <- df[-train_index, ]
+
+# Fit decision tree model
+tree_model <- rpart(Byssinosis ~ Workspace + Employment + Smoking + Sex + Race, data = train_data, method = "class")
+summary(tree_model)
+
+# Predict on test data and calculate accuracy
+tree_pred <- predict(tree_model, newdata = test_data, type = "class")
+tree_accuracy <- mean(tree_pred == test_data$Byssinosis)
+tree_accuracy
+```
+
+```{r}
+# Load required library
+library(e1071)
+
+# Create Train Test Data Split
+set.seed(100) # set seed for reproducibility
+train_index <- createDataPartition(df$Byssinosis, p = 0.8, list = FALSE)
+train_data <- df[train_index, ]
+test_data <- df[-train_index, ]
+
+# Fit Naive Bayes model
+nb_model <- naiveBayes(Byssinosis ~ Workspace + Employment + Smoking + Sex + Race, data = train_data)
+
+# Make predictions on test data and calculate accuracy
+nb_pred <- predict(nb_model, newdata = test_data)
+nb_accuracy <- mean(nb_pred == test_data$Byssinosis)
+nb_accuracy
+```
+
+```{r}
+# Prediction Function for Byssinosis using Tree Model
+predict_Byssinosis <- function(workspace, employment, smoking, sex, race) {
+  # Create a data frame with the input variables
+  input_data <- data.frame(Workspace = workspace,
+                           Employment = employment,
+                           Smoking = smoking,
+                           Sex = sex,
+                           Race = race)
+  # Predict the value of Byssinosis using the tree model
+  prediction <- predict(tree_model, newdata = input_data, type = "class")
+  # Return the predicted value of Byssinosis
+  return(prediction)
+}
 ```
