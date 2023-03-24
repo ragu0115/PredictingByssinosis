@@ -1,0 +1,60 @@
+---
+title: "STA 138 Final Project"
+author: "Raghuram Palaniappan"
+date: "2023-03-18"
+output: html_document
+---
+
+```{r}
+# Utilized Tiffany Dunn's Code as Inspiration to set up original model and data (Linked in references of report) (Link: https://tiffanydunn.tech/project/categorical-stats/categorical_stats/)
+# Set up Libraries and load up data
+library(ggplot2)
+library(caret)
+library(randomForest)
+df <- read.csv("Byssinosis.csv")
+df$Workspace <- as.factor(df$Workspace) # Converts variable to categorical
+```
+
+```{r}
+# Data Visualizations
+library(ggplot2)
+ggplot(df, aes(x=Race, y=Byssinosis)) +
+  geom_boxplot()
+library(ggplot2)
+ggplot(df, aes(x=Workspace, y=Byssinosis)) +
+  geom_boxplot()
+library(ggplot2)
+ggplot(df, aes(x=Employment, y=Byssinosis)) +
+  geom_boxplot()
+library(ggplot2)
+ggplot(df, aes(x=Smoking, y=Byssinosis)) +
+  geom_boxplot()
+library(ggplot2)
+ggplot(df, aes(x=Sex, y=Byssinosis)) +
+  geom_boxplot()
+```
+
+```{r}
+# Modeling the Data
+set.seed(123) # set seed for reproducibility
+
+# Create Train Test Data Split
+train_index <- createDataPartition(df$Byssinosis, p = 0.8, list = FALSE)
+train_data <- df[train_index, ]
+test_data <- df[-train_index, ]
+
+# Logistic Regression
+model <- glm(cbind(Byssinosis, Non.Byssinosis) ~ Workspace + Employment + Smoking + Sex + Race, data = train_data, family = binomial(link = "logit"))
+summary(model)
+# Workplace Dust Explanatory variables give out extremely high t statistic meaning that Workplace dust is a big contributor to Byssinosis
+
+# Test Accuracy of the Model by using the Test Data Set
+glm_pred <- predict(model, newdata = test_data, type = "response")
+glm_pred_class <- ifelse(glm_pred > 0.5, 1, 0)
+glm_accuracy <- mean(glm_pred_class == test_data$Byssinosis)
+glm_accuracy
+```
+
+```{r}
+
+```
